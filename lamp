@@ -1,0 +1,109 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+APACHE2_PID="`cat '/data/data/com.termux/files/usr/var/run/apache2/httpd.pid' 2>/dev/null`"
+MARIADB_PID="`cat '/data/data/com.termux/files/usr/var/run/mariadb.pid' 2>/dev/null`"
+PHP_FPM_PID_FILE='/data/data/com.termux/files/usr/var/run/php-fpm.pid'
+PHP_FPM_PID="`cat "$PHP_FPM_PID_FILE" 2>/dev/null`"
+
+start_apache2 () {
+	if [ -n "$APACHE2_PID" ]; then
+		echo "PID exists: [$APACHE2_PID httpd]. Skipping..."
+	else
+		apachectl start
+	fi
+}
+
+stop_apache2 () {
+	if [ -n "$APACHE2_PID" ]; then
+		apachectl stop
+	else
+		echo 'No PID: [httpd]. Skipping...'
+	fi
+}
+
+start_mariadb () {
+	if [ -n "$MARIADB_PID" ]; then
+		echo "PID exists: [$MARIADB_PID mariadbd]. Skipping..."
+	else
+		mariadbd-safe --nowatch
+	fi
+}
+
+stop_mariadb () {
+	if [ -n "$MARIADB_PID" ]; then
+		mariadb-admin shutdown
+	else
+		echo 'No PID: [mariadbd]. Skipping...'
+	fi
+}
+
+start_php_fpm () {
+	if [ -n "$PHP_FPM_PID" ]; then
+		echo "PID exists: [$PHP_FPM_PID php-fpm]. Skipping..."
+	else
+		php-fpm
+	fi
+}
+
+stop_php_fpm () {
+	if [ -n "$PHP_FPM_PID" ]; then
+		pkill -F "$PHP_FPM_PID_FILE"
+	else
+		echo 'No PID: [php-fpm]. Skipping...'
+	fi
+}
+
+usage () {
+	echo 'Usage: lamp -a[pache2] -m[ariadb] -p[hp-fpm] (default: all) -u[p]|-d[own] (default: up) -h[elp] (display this message)'
+}
+	
+while getopts ':ampudh' o; do
+	case $o in 
+		a) a='yes';;
+		m) m='yes';;
+		p) p='yes';;
+		u) u='yes';;
+		d) d='yes';;
+		\?|h) usage && exit 1;;	
+	esac
+done
+
+if [ -n "$u" ] && [ -n "$d" ]; then
+	usage && exit 1
+fi
+
+if [ -n "$a" ]; then
+	if [ -n "$d" ]; then
+		stop_apache2
+	else
+		start_apache2
+	fi
+fi
+
+if [ -n "$m" ]; then
+	if [ -n "$d" ]; then
+		stop_mariadb
+	else
+		start_mariadb
+	fi
+fi
+
+if [ -n "$p" ]; then
+	if [ -n "$d" ]; then
+		stop_php_fpm
+	else
+		start_php_fpm
+	fi
+fi
+
+if [ -z "$a$m$p" ]; then
+	if [ -n "$d" ]; then
+		stop_apache2
+		stop_mariadb
+		stop_php_fpm
+	else
+		start_apache2
+		start_mariadb
+		start_php_fpm
+	fi
+fi
