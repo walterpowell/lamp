@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/sh
 
 APACHE2_PID="`cat '/data/data/com.termux/files/usr/var/run/apache2/httpd.pid' 2>/dev/null`"
-MARIADB_PID="`cat '/data/data/com.termux/files/usr/var/run/mariadbd.pid' 2>/dev/null`"
+MARIADB_PID="`cat '/data/data/com.termux/files/usr/var/run/mysqld.pid' 2>/dev/null`"
 PHP_FPM_PID="`cat '/data/data/com.termux/files/usr/var/run/php-fpm.pid' 2>/dev/null`"
 
 start_apache2 () {
