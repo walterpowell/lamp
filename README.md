@@ -1,6 +1,6 @@
 In Termux (must have apache2, mariadb and php-fpm installed):
 
-Adjust PID file paths to conform to your environment (for example, mariadb requires specifying PID file in my.cnf).  
+Adjust PID file paths to conform to your environment
 
 Examples:
 
